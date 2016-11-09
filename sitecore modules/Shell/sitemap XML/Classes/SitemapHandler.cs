@@ -18,13 +18,7 @@
  * shared source license.                                                  *
  *                                                                         *
  * *********************************************************************** */
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Sitecore.Configuration;
-using Sitecore.Data;
-using Sitecore.Data.Items;
 
 namespace Sitecore.Modules.SitemapXML
 {
@@ -32,11 +26,10 @@ namespace Sitecore.Modules.SitemapXML
     {
         public void RefreshSitemap(object sender, EventArgs args)
         {
-            SitemapManager sitemapManager = new SitemapManager();
+            var sitemapManager = new SitemapManager();
 
             sitemapManager.SubmitSitemapToSearchenginesByHttp();
             sitemapManager.RegisterSitemapToRobotsFile();
-
         }
     }
 }

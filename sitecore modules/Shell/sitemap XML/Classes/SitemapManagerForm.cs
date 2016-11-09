@@ -20,25 +20,23 @@
  * *********************************************************************** */
 
 using System;
-using Sitecore.Web.UI.HtmlControls;
-using Sitecore.Diagnostics;
-using System.Collections.Specialized;
 using System.Text;
+using Sitecore.Diagnostics;
+using Sitecore.Web.UI.HtmlControls;
+using Sitecore.Web.UI.Sheer;
 
 namespace Sitecore.Modules.SitemapXML
 {
-    public class SitemapManagerForm : Sitecore.Web.UI.Sheer.BaseForm
+    public class SitemapManagerForm : BaseForm
     {
-        protected Button RefreshButton;
         protected Literal Message;
+        protected Button RefreshButton;
 
         protected override void OnLoad(EventArgs args)
         {
             base.OnLoad(args);
-            if (!Sitecore.Context.ClientPage.IsEvent)
-            {
+            if (!Context.ClientPage.IsEvent)
                 RefreshButton.Click = "RefreshButtonClick";
-            }
         }
 
         protected void RefreshButtonClick()
@@ -46,8 +44,8 @@ namespace Sitecore.Modules.SitemapXML
             var sh = new SitemapHandler();
             sh.RefreshSitemap(this, new EventArgs());
 
-            StringDictionary sites = SitemapManagerConfiguration.GetSites();
-            StringBuilder sb = new StringBuilder();
+            var sites = SitemapManagerConfiguration.GetSites();
+            var sb = new StringBuilder();
             foreach (string sitemapFile in sites.Values)
             {
                 if (sb.Length > 0)
@@ -55,20 +53,18 @@ namespace Sitecore.Modules.SitemapXML
                 sb.Append(sitemapFile);
             }
 
-            string message = string.Format(" - The sitemap file <b>\"{0}\"</b> has been refreshed<br /> - <b>\"{0}\"</b> has been registered to \"robots.txt\"", sb.ToString());
-
-            Message.Text = message;
+            Message.Text = $" - The sitemap file <b>\"{sb}\"</b> has been refreshed<br /> - <b>\"{sb}\"</b> has been registered to \"robots.txt\"";
 
             RefreshPanel("MainPanel");
         }
 
         private static void RefreshPanel(string panelName)
         {
-            Sitecore.Web.UI.HtmlControls.Panel ctl = Sitecore.Context.ClientPage.FindControl(panelName) as
-                Sitecore.Web.UI.HtmlControls.Panel;
+            var ctl = Context.ClientPage.FindControl(panelName) as
+                Panel;
             Assert.IsNotNull(ctl, "can't find panel");
 
-            Sitecore.Context.ClientPage.ClientResponse.Refresh(ctl);
+            Context.ClientPage.ClientResponse.Refresh(ctl);
         }
     }
 }

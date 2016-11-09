@@ -19,148 +19,64 @@
  *                                                                         *
  * *********************************************************************** */
 
+using System.Collections.Generic;
 using System.Xml;
 using Sitecore.Configuration;
-using Sitecore.Data;
-using Sitecore.Data.Items;
+using System.Linq;
 using Sitecore.Xml;
-using System.Collections.Specialized;
 
 namespace Sitecore.Modules.SitemapXML
 {
     public class SitemapManagerConfiguration
     {
         #region properties
-
-
-
-        public static string XmlnsTpl
-        {
-            get
-            {
-                return GetValueByName("xmlnsTpl");
-            }
-        }
-
-
-
-        public static string WorkingDatabase
-        {
-            get
-            {
-                return GetValueByName("database");
-            }
-        }
-
-        public static string SitemapConfigurationItemPath
-        {
-            get
-            {
-                return GetValueByName("sitemapConfigurationItemPath");
-            }
-        }
-
-        public static string EnabledTemplates
-        {
-            get
-            {
-                return GetValueByNameFromDatabase("Enabled templates");
-            }
-        }
-
-        public static string ExcludeItems
-        {
-            get
-            {
-                return GetValueByNameFromDatabase("Exclude items");
-            }
-        }
-
-        public static bool IsProductionEnvironment
-        {
-            get
-            {
-                string production = GetValueByName("productionEnvironment");
-                return !string.IsNullOrEmpty(production) && (production.ToLower() == "true" || production == "1");
-            }
-        }
-
-        public static bool GenerateRobotsFile
-        {
-            get
-            {
-                var generateRobotsFile = GetValueByName("generateRobotsFile");
-
-                // Defaults to true if setting is missing from config
-                return string.IsNullOrEmpty(generateRobotsFile) || (generateRobotsFile.ToLower() == "true" || generateRobotsFile == "1");
-            }
-        }
-
+        public static string XmlnsTpl => GetValueByName("xmlnsTpl");
+        public static string WorkingDatabase => GetValueByName("database");
+        public static string SitemapConfigurationItemPath => GetValueByName("sitemapConfigurationItemPath");
+        public static string EnabledTemplates => GetValueByNameFromDatabase("Enabled templates");
+        public static string ExcludeItems => GetValueByNameFromDatabase("Exclude items");
+        public static bool IsProductionEnvironment => GetBoolValueByName("productionEnvironment");
+        public static bool GenerateRobotsFile => GetBoolValueByName("generateRobotsFile");
         #endregion properties
 
         private static string GetValueByName(string name)
         {
-            string result = string.Empty;
+            var node = Factory.GetConfigNodes("sitemapVariables/sitemapVariable")
+                .Cast<XmlNode>()
+                .FirstOrDefault(x => XmlUtil.GetAttribute("name", x) == name);
 
-            foreach (XmlNode node in Factory.GetConfigNodes("sitemapVariables/sitemapVariable"))
-            {
+            return node != null ? XmlUtil.GetAttribute("value", node) : string.Empty;
+        }
 
-                if (XmlUtil.GetAttribute("name", node) == name)
-                {
-                    result = XmlUtil.GetAttribute("value", node);
-                    break;
-                }
-            }
+        private static bool GetBoolValueByName(string name)
+        {
+            bool result;
+            bool.TryParse(GetValueByName(name), out result);
 
             return result;
         }
 
         private static string GetValueByNameFromDatabase(string name)
         {
-            string result = string.Empty;
-
-            Database db = Factory.GetDatabase(WorkingDatabase);
-            if (db != null)
-            {
-                Item configItem = db.Items[SitemapConfigurationItemPath];
-                if (configItem != null)
-                {
-                    result = configItem[name];
-                }
-            }
-
-            return result;
+            var configItem = Factory.GetDatabase(WorkingDatabase)?.Items[SitemapConfigurationItemPath];
+            return configItem != null ? configItem[name] : string.Empty;
         }
 
-        public static StringDictionary GetSites()
+        public static IDictionary<string, string> GetSites()
         {
-            StringDictionary sites = new StringDictionary();
-            foreach (XmlNode node in Factory.GetConfigNodes("sitemapVariables/sites/site"))
-            {
-                if (!string.IsNullOrEmpty(XmlUtil.GetAttribute("name", node)) && !string.IsNullOrEmpty(XmlUtil.GetAttribute("filename", node)))
-                {
-                    sites.Add(XmlUtil.GetAttribute("name", node), XmlUtil.GetAttribute("filename", node));
-                }
-
-            }
-            return sites;
+            return Factory.GetConfigNodes("sitemapVariables/sites/site").Cast<XmlNode>()
+                .Where(x => !string.IsNullOrEmpty(XmlUtil.GetAttribute("name", x)) &&
+                            !string.IsNullOrEmpty(XmlUtil.GetAttribute("filename", x)))
+                .ToDictionary(x => XmlUtil.GetAttribute("name", x), x => XmlUtil.GetAttribute("filename", x));
         }
 
         public static string GetServerUrlBySite(string name)
         {
-            string result = string.Empty;
+            var node = Factory.GetConfigNodes("sitemapVariables/sites/site")
+                .Cast<XmlNode>()
+                .FirstOrDefault(x => XmlUtil.GetAttribute("name", x) == name);
 
-            foreach (XmlNode node in Factory.GetConfigNodes("sitemapVariables/sites/site"))
-            {
-
-                if (XmlUtil.GetAttribute("name", node) == name)
-                {
-                    result = XmlUtil.GetAttribute("serverUrl", node);
-                    break;
-                }
-            }
-
-            return result;
+            return node != null ? XmlUtil.GetAttribute("serverUrl", node) : string.Empty;
         }
     }
 }

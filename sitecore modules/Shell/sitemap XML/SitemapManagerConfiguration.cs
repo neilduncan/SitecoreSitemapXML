@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Xml;
 using Sitecore.Configuration;
 using System.Linq;
+using Sitecore.Data.Items;
 using Sitecore.Xml;
 
 namespace Sitecore.Modules.SitemapXML
@@ -33,10 +34,9 @@ namespace Sitecore.Modules.SitemapXML
         public static string XmlnsTpl => GetValueByName("xmlnsTpl");
         public static string WorkingDatabase => GetValueByName("database");
         public static string SitemapConfigurationItemPath => GetValueByName("sitemapConfigurationItemPath");
-        public static string EnabledTemplates => GetValueByNameFromDatabase("Enabled templates");
-        public static string ExcludeItems => GetValueByNameFromDatabase("Exclude items");
         public static bool IsProductionEnvironment => GetBoolValueByName("productionEnvironment");
         public static bool GenerateRobotsFile => GetBoolValueByName("generateRobotsFile");
+        public static Item ConfigItem => Factory.GetDatabase(WorkingDatabase).GetItem(SitemapConfigurationItemPath);
         #endregion properties
 
         private static string GetValueByName(string name)
@@ -54,12 +54,6 @@ namespace Sitecore.Modules.SitemapXML
             bool.TryParse(GetValueByName(name), out result);
 
             return result;
-        }
-
-        private static string GetValueByNameFromDatabase(string name)
-        {
-            var configItem = Factory.GetDatabase(WorkingDatabase)?.Items[SitemapConfigurationItemPath];
-            return configItem != null ? configItem[name] : string.Empty;
         }
 
         public static IDictionary<string, string> GetSites()

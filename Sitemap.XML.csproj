@@ -66,6 +66,11 @@
     <Reference Include="System.Web.Mobile" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="sitecore modules\Shell\sitemap XML\Filters\ExcludedItemFilter.cs" />
+    <Compile Include="sitecore modules\Shell\sitemap XML\Filters\FilterFactory.cs" />
+    <Compile Include="sitecore modules\Shell\sitemap XML\Filters\IItemFilter.cs" />
+    <Compile Include="sitecore modules\Shell\sitemap XML\Classes\ItemExtensions.cs" />
+    <Compile Include="sitecore modules\Shell\sitemap XML\Filters\TemplateFilter.cs" />
     <Compile Include="sitecore modules\Shell\sitemap XML\Classes\SitemapHandler.cs" />
     <Compile Include="sitecore modules\Shell\sitemap XML\Classes\SitemapManager.cs" />
     <Compile Include="sitecore modules\Shell\sitemap XML\Classes\SitemapManagerForm.cs" />
@@ -79,7 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\PublishProfiles\KeithProwse.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
